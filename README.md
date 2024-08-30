@@ -18,7 +18,7 @@ To run Volga tests (https://github.com/volga-project/volga/blob/master/volga/str
 
   ```docker run --rm -v $(pwd):/io ghcr.io/pyo3/maturin build -i python3.10```
 
-  This will create a ```.whl``` file in ```/volga/rust/target/wheels```, you will need to reference it in ```REMOTE_RAY_CLUSTER_TEST_RUNTIME_ENV``` python var in https://github.com/volga-project/volga/blob/master/volga/streaming/runtime/network/testing_utils.py
+  This will create a ```.whl``` file in ```/volga/rust/target/wheels```, you will need to reference it in ```REMOTE_RAY_CLUSTER_TEST_RUNTIME_ENV``` python var in ```'py_modules'``` field in https://github.com/volga-project/volga/blob/master/volga/streaming/runtime/network/testing_utils.py
   
 - Forward 10001 port from ray head node (pod) so ray client can connect to it from local machine (to 12345 local port):
 
