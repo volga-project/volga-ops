@@ -1,0 +1,14 @@
+releases:
+  - chart: kuberay/kuberay-operator
+    name: kuberay-operator
+    namespace: ray-system
+    values:
+      - values/kuberay/kuberay-operator/values.yaml.gotmpl
+  - chart: kuberay/ray-cluster
+    name: ray-cluster
+    namespace: ray-system
+    values:
+      - values/kuberay/ray-cluster/values.yaml.gotmpl
+repositories:
+  - name: kuberay
+    url: https://ray-project.github.io/kuberay-helm/

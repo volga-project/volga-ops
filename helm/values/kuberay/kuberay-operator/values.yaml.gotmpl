@@ -1,0 +1,14 @@
+image:
+  repository: quay.io/kuberay/operator
+  tag: v1.1.1
+  pullPolicy: IfNotPresent
+
+livenessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  failureThreshold: 5
+
+readinessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  failureThreshold: 5
