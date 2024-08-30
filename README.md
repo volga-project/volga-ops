@@ -1,4 +1,10 @@
-Deploying Ray cluster
+Start Minikube cluster
+
+- ```minikube config set memory 8192``` # sets memory per node
+  
+- ```minikube start --driver docker --nodes 5``` # cluster with 5 nodes
+
+Deploy Ray cluster
 - Intsall ```helmfile``` - https://github.com/helmfile/helmfile 
 - Install kuberay (from /helm folder):
 
