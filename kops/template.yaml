@@ -1,0 +1,225 @@
+apiVersion: kops.k8s.io/v1alpha2
+kind: Cluster
+metadata:
+  name: {{.cluster_name}}
+spec:
+  additionalPolicies:
+    master: |
+      [
+        {"Effect":"Allow","Action":["autoscaling:DescribeAutoScalingGroups","autoscaling:DescribeAutoScalingInstances","autoscaling:DescribeLaunchConfigurations","autoscaling:DescribeTags","autoscaling:SetDesiredCapacity","autoscaling:TerminateInstanceInAutoScalingGroup","ec2:DescribeInstanceTypes","ec2:DescribeLaunchTemplateVersions"],"Resource":"*"}
+      ]
+    node: |
+      [
+        {"Effect":"Allow","Action":["autoscaling:DescribeAutoScalingGroups","autoscaling:DescribeAutoScalingInstances","autoscaling:DescribeLaunchConfigurations","autoscaling:DescribeTags","autoscaling:SetDesiredCapacity","autoscaling:TerminateInstanceInAutoScalingGroup","ec2:DescribeInstanceTypes","ec2:DescribeLaunchTemplateVersions"],"Resource":"*"},
+        {"Effect":"Allow","Action":["events:DeleteRule","events:ListRules","events:ListTargetsByRule","events:ListTagsForResource","events:PutEvents","events:PutRule","events:PutTargets","events:RemoveTargets","events:TagResource","sqs:CreateQueue","sqs:DeleteQueue","sqs:GetQueueAttributes","sqs:ListQueues","sqs:ListQueueTags"],"Resource": "*"}
+      ]
+  api:
+    dns: {}
+  authorization:
+    rbac: {}
+  channel: stable
+  cloudProvider: aws
+  configBase: s3://{{.kops_s3_bucket_name}}/{{.cluster_name}}
+  # Create one etcd member per AZ
+  etcdClusters:
+  - etcdMembers:
+  {{range $i, $az := .azs}}
+    - instanceGroup: master-{{.}}
+      name: {{. | replace $.region "" }}
+      encryptedVolume: true
+#      volumeSize # TODO
+  {{end}}
+    name: main
+    cpuRequest: 200m
+    memoryRequest: 100Mi
+  - etcdMembers:
+  {{range $i, $az := .azs}}
+    - instanceGroup: master-{{.}}
+      name: {{. | replace $.region "" }}
+      encryptedVolume: true
+      # volumeSize # TODO
+  {{end}}
+    name: events
+    cpuRequest: 100m
+    memoryRequest: 100Mi
+  - etcdMembers:
+    {{range $i, $az := .azs}}
+    - instanceGroup: master-{{.}}
+      name: {{. | replace $.region "" }}
+      encryptedVolume: true
+      # volumeSize # TODO
+    {{end}}
+    name: cilium
+    cpuRequest: 100m
+    memoryRequest: 100Mi
+    manager:
+      env:
+        - name: ETCD_AUTO_COMPACTION_MODE
+          value: revision
+        - name: ETCD_AUTO_COMPACTION_RETENTION
+          value: "2500"
+  iam:
+    allowContainerRegistry: true
+    legacy: false
+  kubernetesVersion: 1.25.9 # old - 1.22.5
+  masterPublicName: api.{{.cluster_name}}
+  networkCIDR: {{.vpc_cidr_block}}
+  kubeProxy:
+    enabled: false # for cilium BPF
+  networkID: {{.vpc_id}}
+  kubelet:
+    anonymousAuth: false
+  networking:
+    cilium:
+      etcdManaged: true
+      enableNodePort: true # BPF support
+      enableEncryption: false
+#      cpuRequest: "25m"
+#      memoryRequest: "128Mi" TODO
+  nonMasqueradeCIDR: {{.k8s_non_masquerade_cidr}}
+  # TODO are these 0.0.0.0/0 needed?
+  sshAccess:
+  - 0.0.0.0/0
+  kubernetesApiAccess:
+  - 0.0.0.0/0
+  subnets:
+  # Public subnets, one per AZ
+  {{range $i, $id := .public_subnets}}
+  - id: {{.}}
+    name: {{index $.azs $i}}
+    type: Public
+    zone: {{index $.azs $i}}
+  {{end}}
+  # Private subnets, one per AZ
+  {{range $i, $id := .private_subnets}}
+  - id: {{.}}
+    name: {{index $.azs $i}}
+    type: Private
+    zone: {{index $.azs $i}}
+    egress: {{index $.natgw_ids 0}}
+  {{end}}
+  topology:
+    dns:
+      type: Public
+    masters: public
+    nodes: public
+---
+
+# TODO optimize rootVolumeSize
+# TODO for each InstanceGroup add extra security-groups to open necessary ports (e.g. Cilium etcd)
+# Create one master per AZ
+{{range .azs}}
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{$.cluster_name}}
+  name: master-{{.}}
+spec:
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: ""
+    k8s.io/cluster-autoscaler/{{$.cluster_name}}: ""
+  machineType: t3.medium
+  maxSize: 1
+  minSize: 1
+  role: Master
+  rootVolumeSize: 20
+  rootVolumeType: gp2
+  securityGroupOverride: {{$.security_group_override}}
+  nodeLabels:
+    kops.k8s.io/instancegroup: master-{{.}}
+  subnets:
+  - {{.}}
+---
+{{end}}
+
+
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{.cluster_name}}
+  name: nodes-common-on-demand
+spec:
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: ""
+    k8s.io/cluster-autoscaler/{{.cluster_name}}: ""
+  machineType: t3.medium
+  maxSize: 5
+  minSize: 1
+  role: Node
+  rootVolumeSize: 20
+  rootVolumeType: gp2
+  securityGroupOverride: {{.security_group_override}}
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-common-on-demand
+    instance-type: on-demand
+    workload-type: common
+  subnets:
+  {{range .azs}}
+  - {{.}}
+  {{end}}
+---
+
+# TODO set mixedInstancesPolicy
+# TODO set warmPool
+# TODO set maxPrice by instance type/dynamically
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{.cluster_name}}
+  name: nodes-ray-on-demand
+spec:
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: ""
+    k8s.io/cluster-autoscaler/{{.cluster_name}}: ""
+  machineType: t4g.medium # arm64 graviton proc
+  maxSize: 50
+  minSize: 1
+  securityGroupOverride: {{.security_group_override}}
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-ray-on-demand
+    workload-type: ray
+    instance-type: on-demand
+  taints:
+    - instance-type=on-demand:NoSchedule
+    - workload-type=ray:NoSchedule
+  role: Node
+  rootVolumeSize: 20
+  rootVolumeType: gp2
+  subnets:
+  {{range .azs}}
+  - {{.}}
+  {{end}}
+---
+
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{.cluster_name}}
+  name: nodes-ray-spot
+spec:
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: ""
+    k8s.io/cluster-autoscaler/{{.cluster_name}}: ""
+  machineType: r6g.xlarge # arm64 graviton proc
+  maxPrice: "0.08"
+  maxSize: 2
+  minSize: 2
+  securityGroupOverride: {{.security_group_override}}
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-ray-spot
+    instance-type: spot
+    workload-type: ray
+  taints:
+    - instance-type=spot:NoSchedule
+    - workload-type=ray:NoSchedule
+  role: Node
+  rootVolumeSize: 20
+  rootVolumeType: gp2
+  subnets:
+  {{range .azs}}
+  - {{.}}
+  {{end}}

@@ -1,0 +1,182 @@
+apiVersion: kops.k8s.io/v1alpha2
+kind: Cluster
+metadata:
+  name: k8s.vpc-apne1.dev.svoe.link
+spec:
+  additionalPolicies:
+    master: |
+      [
+        {"Effect":"Allow","Action":["autoscaling:DescribeAutoScalingGroups","autoscaling:DescribeAutoScalingInstances","autoscaling:DescribeLaunchConfigurations","autoscaling:DescribeTags","autoscaling:SetDesiredCapacity","autoscaling:TerminateInstanceInAutoScalingGroup","ec2:DescribeInstanceTypes","ec2:DescribeLaunchTemplateVersions"],"Resource":"*"}
+      ]
+    node: |
+      [
+        {"Effect":"Allow","Action":["autoscaling:DescribeAutoScalingGroups","autoscaling:DescribeAutoScalingInstances","autoscaling:DescribeLaunchConfigurations","autoscaling:DescribeTags","autoscaling:SetDesiredCapacity","autoscaling:TerminateInstanceInAutoScalingGroup","ec2:DescribeInstanceTypes","ec2:DescribeLaunchTemplateVersions"],"Resource":"*"},
+        {"Effect":"Allow","Action":["events:DeleteRule","events:ListRules","events:ListTargetsByRule","events:ListTagsForResource","events:PutEvents","events:PutRule","events:PutTargets","events:RemoveTargets","events:TagResource","sqs:CreateQueue","sqs:DeleteQueue","sqs:GetQueueAttributes","sqs:ListQueues","sqs:ListQueueTags"],"Resource": "*"}
+      ]
+  api:
+    dns: {}
+  authorization:
+    rbac: {}
+  channel: stable
+  cloudProvider: aws
+  configBase: s3://dev-kops-s3/k8s.vpc-apne1.dev.svoe.link
+  etcdClusters:
+  - cpuRequest: 200m
+    etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: master-ap-northeast-1a
+      name: a
+    memoryRequest: 100Mi
+    name: main
+  - cpuRequest: 100m
+    etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: master-ap-northeast-1a
+      name: a
+    memoryRequest: 100Mi
+    name: events
+  - cpuRequest: 100m
+    etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: master-ap-northeast-1a
+      name: a
+    manager:
+      env:
+      - name: ETCD_AUTO_COMPACTION_MODE
+        value: revision
+      - name: ETCD_AUTO_COMPACTION_RETENTION
+        value: "2500"
+    memoryRequest: 100Mi
+    name: cilium
+  iam:
+    allowContainerRegistry: true
+    legacy: false
+  kubeProxy:
+    enabled: false
+  kubelet:
+    anonymousAuth: false
+  kubernetesApiAccess:
+  - 0.0.0.0/0
+  kubernetesVersion: 1.25.9
+  masterPublicName: api.k8s.vpc-apne1.dev.svoe.link
+  networkCIDR: 10.100.0.0/16
+  networkID: vpc-02eba23ddbbf5c077
+  networking:
+    cilium:
+      enableEncryption: false
+      enableNodePort: true
+      etcdManaged: true
+  nonMasqueradeCIDR: 100.64.0.0/10
+  sshAccess:
+  - 0.0.0.0/0
+  subnets:
+  - id: subnet-0af26ff6b484dd1e8
+    name: ap-northeast-1a
+    type: Public
+    zone: ap-northeast-1a
+  topology:
+    dns:
+      type: Public
+    masters: public
+    nodes: public
+---
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: k8s.vpc-apne1.dev.svoe.link
+  name: master-ap-northeast-1a
+spec:
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: ""
+    k8s.io/cluster-autoscaler/k8s.vpc-apne1.dev.svoe.link: ""
+  machineType: t3.medium
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: master-ap-northeast-1a
+  role: Master
+  rootVolumeSize: 20
+  rootVolumeType: gp2
+  securityGroupOverride: sg-09b8fbe061be615a9
+  subnets:
+  - ap-northeast-1a
+---
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: k8s.vpc-apne1.dev.svoe.link
+  name: nodes-common-on-demand
+spec:
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: ""
+    k8s.io/cluster-autoscaler/k8s.vpc-apne1.dev.svoe.link: ""
+  machineType: t3.medium
+  maxSize: 5
+  minSize: 1
+  nodeLabels:
+    instance-type: on-demand
+    kops.k8s.io/instancegroup: nodes-common-on-demand
+    workload-type: common
+  role: Node
+  rootVolumeSize: 20
+  rootVolumeType: gp2
+  securityGroupOverride: sg-09b8fbe061be615a9
+  subnets:
+  - ap-northeast-1a
+---
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: k8s.vpc-apne1.dev.svoe.link
+  name: nodes-ray-on-demand
+spec:
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: ""
+    k8s.io/cluster-autoscaler/k8s.vpc-apne1.dev.svoe.link: ""
+  machineType: t4g.medium
+  maxSize: 50
+  minSize: 1
+  nodeLabels:
+    instance-type: on-demand
+    kops.k8s.io/instancegroup: nodes-ray-on-demand
+    workload-type: ray
+  role: Node
+  rootVolumeSize: 20
+  rootVolumeType: gp2
+  securityGroupOverride: sg-09b8fbe061be615a9
+  subnets:
+  - ap-northeast-1a
+  taints:
+  - instance-type=on-demand:NoSchedule
+  - workload-type=ray:NoSchedule
+---
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: k8s.vpc-apne1.dev.svoe.link
+  name: nodes-ray-spot
+spec:
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: ""
+    k8s.io/cluster-autoscaler/k8s.vpc-apne1.dev.svoe.link: ""
+  machineType: r6g.xlarge
+  maxPrice: "0.08"
+  maxSize: 2
+  minSize: 2
+  nodeLabels:
+    instance-type: spot
+    kops.k8s.io/instancegroup: nodes-ray-spot
+    workload-type: ray
+  role: Node
+  rootVolumeSize: 20
+  rootVolumeType: gp2
+  securityGroupOverride: sg-09b8fbe061be615a9
+  subnets:
+  - ap-northeast-1a
+  taints:
+  - instance-type=spot:NoSchedule
+  - workload-type=ray:NoSchedule
