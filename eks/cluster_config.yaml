@@ -1,0 +1,66 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: volga-test-cluster
+  region: ap-northeast-1
+
+vpc:
+  id: vpc-02eba23ddbbf5c077
+  cidr: 10.100.0.0/16
+  subnets:
+    public:
+      ap-northeast-1a:
+        id: subnet-0af26ff6b484dd1e8
+      ap-northeast-1c:
+        id: subnet-015f93d54a679f8ea
+nodeGroups:
+  - name: shared
+    instanceType: t3.medium
+    desiredCapacity: 1
+    subnets:
+      - subnet-0af26ff6b484dd1e8
+    kubeletExtraConfig:
+      cpuCFSQuota: false
+  - name: ray-head
+    instanceType: t3.medium
+    desiredCapacity: 1
+    subnets:
+      - subnet-0af26ff6b484dd1e8
+    kubeletExtraConfig:
+      cpuCFSQuota: false
+    labels:
+      workload-type: ray
+      ray-role: head
+    taints:
+      - key: workload-type
+        value: ray
+        effect: NoSchedule
+      - key: ray-role
+        value: head
+        effect: NoSchedule
+  - name: ray-workers
+    instanceType: c5.2xlarge
+    desiredCapacity: 2
+#    minSize: 2
+#    maxSize: 2
+#    instancesDistribution:
+#      maxPrice: 0.1
+#      instanceTypes:
+#        - c5.2xlarge
+#      onDemandBaseCapacity: 0
+#      onDemandPercentageAboveBaseCapacity: 0
+    subnets:
+      - subnet-0af26ff6b484dd1e8
+    kubeletExtraConfig:
+      cpuCFSQuota: false
+    labels:
+      workload-type: ray
+      ray-role: worker
+    taints:
+      - key: workload-type
+        value: ray
+        effect: NoSchedule
+      - key: ray-role
+        value: worker
+        effect: NoSchedule
