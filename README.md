@@ -6,8 +6,11 @@ Start Minikube cluster
   
 - ```minikube start --driver docker --nodes 5``` # cluster with 5 nodes
 
+
 Deploy Ray cluster
-- Intsall ```helmfile``` - https://github.com/helmfile/helmfile 
+- Intsall ```helmfile``` - https://github.com/helmfile/helmfile
+
+- Make sure ```clusterType``` env val is set to ```minikube``` in ```helm/env_values.yaml```
 - Install kuberay (from /helm folder):
 
   ```helmfile --selector name=kuberay-operator sync```
