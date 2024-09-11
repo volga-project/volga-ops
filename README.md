@@ -1,3 +1,5 @@
+## Running on Minikube
+
 Start Minikube cluster
 
 - ```minikube config set memory 8192``` # sets memory per node
@@ -33,3 +35,14 @@ To run Volga tests (https://github.com/volga-project/volga/blob/master/volga/str
 - Run ```TestRemoteTransfer.test_n_to_n_parallel_on_ray(n=1, ray_addr=RAY_ADDR, runtime_env=REMOTE_RAY_CLUSTER_TEST_RUNTIME_ENV, multinode=True)```:
 
   ```python test_remote_transfer.py``` (from https://github.com/volga-project/volga/blob/master/volga/streaming/runtime/network/)
+
+
+## Running in Docker
+
+```
+cd docker
+docker build . -t volga_perf
+docker run volga_perf
+```
+
+Test script is in ```perf_test.py```. Everytime script is updated image needs to be re-built (```docker build . -t volga_perf```)
