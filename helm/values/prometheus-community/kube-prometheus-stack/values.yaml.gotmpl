@@ -1,0 +1,44 @@
+alertmanager:
+  enabled: false
+
+prometheusOperator:
+  admissionWebhooks:
+    patch:
+      resources:
+        limits:
+          cpu: 30m
+          memory: 50Mi
+        requests:
+          cpu: 30m
+          memory: 30Mi
+  resources:
+    limits:
+      cpu: 50m
+      memory: 150Mi
+    requests:
+      cpu: 50m
+      memory: 50Mi
+
+prometheus:
+  prometheusSpec:
+    image:
+      registry: quay.io
+      repository: prometheus/prometheus
+      tag: v2.54.1
+      sha: ""
+    serviceMonitorSelectorNilUsesHelmValues: false
+    # https://github.com/prometheus-operator/prometheus-operator/issues/3636
+    podMonitorSelectorNilUsesHelmValues: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 300Mi
+
+kubelet:
+  serviceMonitor:
+    https: true
+
+kube-state-metrics:
+  metricLabelsAllowlist:
+    - nodes=[*]
+    - pods=[*]

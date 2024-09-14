@@ -33,17 +33,13 @@ head:
   resources:
     {{ if (eq .Values.clusterType "minikube") }}
     limits:
-      cpu: null
       memory: 3Gi
     requests:
-      cpu: 1
       memory: 3Gi
     {{ else }}
     limits:
-      cpu: null
       memory: 4Gi
     requests:
-      cpu: 1
       memory: 3Gi
     {{ end }}
   annotations: {}
@@ -86,7 +82,7 @@ worker:
   {{ if (eq .Values.clusterType "minikube") }}
   replicas: 2
   {{ else }}
-  replicas: 2
+  replicas: 1
   {{ end }}
   minReplicas: 0
   maxReplicas: 1000
@@ -123,18 +119,14 @@ worker:
   {{ if (eq .Values.clusterType "minikube") }}
   resources:
     limits:
-      cpu: null
       memory: 8Gi
     requests:
-      cpu: 3
       memory: 7Gi
   {{ else }}
   resources:
     limits:
-      cpu: null
       memory: 16Gi
     requests:
-      cpu: 7
       memory: 14Gi
   {{ end }}
   volumes:

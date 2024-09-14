@@ -1,0 +1,24 @@
+Ubuntu
+
+sudo apt-get update && sudo apt-get install git && sudo apt-get install nano
+
+curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
+
+git clone https://github.com/volga-project/volga-ops.git
+
+cd volga-ops/docker
+sudo docker build . -t  volga_perf
+sudo docker run volga_perf
+
+---
+
+Amazon linux & Red Hat
+
+sudo yum update -y && sudo yum install git -y && sudo yum install nano -y && sudo yum install -y docker
+
+sudo service docker start
+
+
+
+
+

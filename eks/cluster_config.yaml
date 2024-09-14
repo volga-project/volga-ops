@@ -22,6 +22,8 @@ nodeGroups:
       - subnet-0af26ff6b484dd1e8
     kubeletExtraConfig:
       cpuCFSQuota: false
+    ssh:
+      allow: true
   - name: ray-head
     instanceType: t3.medium
     desiredCapacity: 1
@@ -29,6 +31,8 @@ nodeGroups:
       - subnet-0af26ff6b484dd1e8
     kubeletExtraConfig:
       cpuCFSQuota: false
+    ssh:
+      allow: true
     labels:
       workload-type: ray
       ray-role: head
@@ -41,7 +45,9 @@ nodeGroups:
         effect: NoSchedule
   - name: ray-workers
     instanceType: c5.2xlarge
-    desiredCapacity: 2
+    desiredCapacity: 1
+    ssh:
+      allow: true
 #    minSize: 2
 #    maxSize: 2
 #    instancesDistribution:

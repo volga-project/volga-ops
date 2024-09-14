@@ -13,6 +13,13 @@ releases:
     namespace: ray-system
     values:
       - values/kuberay/ray-cluster/values.yaml.gotmpl
+  - chart: prometheus-community/kube-prometheus-stack
+    name: kube-prometheus-stack
+    namespace: monitoring
+    values:
+      - values/prometheus-community/kube-prometheus-stack/values.yaml.gotmpl
 repositories:
   - name: kuberay
     url: https://ray-project.github.io/kuberay-helm/
+  - name: prometheus-community
+    url: https://prometheus-community.github.io/helm-charts
