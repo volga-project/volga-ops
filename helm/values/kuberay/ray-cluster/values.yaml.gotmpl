@@ -80,9 +80,9 @@ head:
 
 worker:
   {{ if (eq .Values.clusterType "minikube") }}
-  replicas: 2
+  replicas: 9
   {{ else }}
-  replicas: 1
+  replicas: 140
   {{ end }}
   minReplicas: 0
   maxReplicas: 1000
@@ -92,11 +92,11 @@ worker:
   # disabled: true
   groupName: test-group
   rayStartParams:
-    {{ if (eq .Values.clusterType "minikube") }}
-    num-cpus: '4'
-    {{ else }}
-    num-cpus: '8'
-    {{ end }}
+#    {{ if (eq .Values.clusterType "minikube") }}
+#    num-cpus: '4'
+#    {{ else }}
+#    num-cpus: '8'
+#    {{ end }}
 #    resources: '"{\"worker_size_small\": 9999999, \"instance_on_demand\": 9999999}"'
 #    node-ip-address: $MY_POD_IP
     block: 'true'
@@ -125,9 +125,9 @@ worker:
   {{ else }}
   resources:
     limits:
-      memory: 16Gi
+      memory: 4Gi
     requests:
-      memory: 14Gi
+      memory: 3Gi
   {{ end }}
   volumes:
     - name: log-volume

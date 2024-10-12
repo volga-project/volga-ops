@@ -4,35 +4,37 @@ kind: ClusterConfig
 metadata:
   name: volga-test-cluster
   region: ap-northeast-1
-
+# https://www.davidc.net/sites/default/subnets/subnets.html for cidr split
 vpc:
   id: vpc-02eba23ddbbf5c077
   cidr: 10.100.0.0/16
   subnets:
     public:
       ap-northeast-1a:
-        id: subnet-0af26ff6b484dd1e8
+        id: subnet-0875b1951471ddede
       ap-northeast-1c:
-        id: subnet-015f93d54a679f8ea
+        id: subnet-0e385e00f0b80e03f
 nodeGroups:
   - name: shared
     instanceType: t3.medium
     desiredCapacity: 1
     subnets:
-      - subnet-0af26ff6b484dd1e8
+      - ap-northeast-1a
     kubeletExtraConfig:
       cpuCFSQuota: false
     ssh:
       allow: true
+    amiFamily: Ubuntu2204
   - name: ray-head
     instanceType: t3.medium
     desiredCapacity: 1
     subnets:
-      - subnet-0af26ff6b484dd1e8
+      - ap-northeast-1a
     kubeletExtraConfig:
       cpuCFSQuota: false
     ssh:
       allow: true
+    amiFamily: Ubuntu2204
     labels:
       workload-type: ray
       ray-role: head
@@ -44,10 +46,12 @@ nodeGroups:
         value: head
         effect: NoSchedule
   - name: ray-workers
-    instanceType: c5.2xlarge
-    desiredCapacity: 1
+#    instanceType: c5.2xlarge
+    instanceType: t3.medium
+    desiredCapacity: 10
     ssh:
       allow: true
+    amiFamily: Ubuntu2204
 #    minSize: 2
 #    maxSize: 2
 #    instancesDistribution:
@@ -57,7 +61,7 @@ nodeGroups:
 #      onDemandBaseCapacity: 0
 #      onDemandPercentageAboveBaseCapacity: 0
     subnets:
-      - subnet-0af26ff6b484dd1e8
+      - ap-northeast-1a
     kubeletExtraConfig:
       cpuCFSQuota: false
     labels:

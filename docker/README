@@ -12,9 +12,11 @@ sudo docker run volga_perf
 
 ---
 
-Amazon linux & Red Hat
+Amazon linux & Red Hat & Bottlerocket
 
 sudo yum update -y && sudo yum install git -y && sudo yum install nano -y && sudo yum install -y docker
+
+(For Bottlerocket) sudo amazon-linux-extras install docker
 
 sudo service docker start
 
