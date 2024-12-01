@@ -16,7 +16,7 @@ vpc:
         id: subnet-0e385e00f0b80e03f
 nodeGroups:
   - name: shared
-    instanceType: t3.medium
+    instanceType: c5.xlarge
     desiredCapacity: 1
     subnets:
       - ap-northeast-1a
@@ -26,7 +26,7 @@ nodeGroups:
       allow: true
     amiFamily: Ubuntu2204
   - name: ray-head
-    instanceType: t3.medium
+    instanceType: c5.xlarge
     desiredCapacity: 1
     subnets:
       - ap-northeast-1a
@@ -46,9 +46,9 @@ nodeGroups:
         value: head
         effect: NoSchedule
   - name: ray-workers
-#    instanceType: c5.2xlarge
-    instanceType: t3.medium
-    desiredCapacity: 10
+    instanceType: c5.2xlarge
+#    instanceType: t3.medium
+    desiredCapacity: 2
     ssh:
       allow: true
     amiFamily: Ubuntu2204
