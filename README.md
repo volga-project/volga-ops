@@ -1,4 +1,23 @@
-## Running on Minikube
+# Running on Kubernetes
+
+## Launching EKS cluster
+
+Make sure you have a proper AWS account with right permissions. 
+Install [eksctl](https://eksctl.io/)
+Locate [cluster_config.yaml](https://github.com/volga-project/volga-ops/blob/master/eks/cluster_config.yaml) on your machine (cd into this dir)
+
+Start Cluster
+  - ```eksctl create cluster -f cluster_config.yaml```
+
+Scale Cluster
+  - ```eksctl scale nodegroup --cluster=volga-test-cluster --nodes=16 --name=ray-workers --nodes-min=0 --nodes-max=16```
+
+Delete Cluster
+  - ```eksctl delete cluster -f cluster_config.yaml --disable-nodegroup-eviction --force```
+
+Note that the config uses hard-coded VPC configuration, you will need to create your own (or use default values given by eksctl)
+
+## Launching Minikube cluster
 
 Start Minikube cluster
 
@@ -6,6 +25,7 @@ Start Minikube cluster
   
 - ```minikube start --driver docker --nodes 5``` # cluster with 5 nodes
 
+## Deploy
 
 Deploy Ray cluster
 - Intsall ```helmfile``` - https://github.com/helmfile/helmfile
@@ -22,6 +42,8 @@ Deploy Ray cluster
   ```helmfile --selector name=ray-cluster delete```,
   ```helmfile --selector name=ray-cluster sync```
 - ```helm/values/kuberay/ray-cluster/values.yaml.gotmpl``` contains cluster configuration values (head/worker specs, ports, CPU/MEM reqs, etc.)
+
+Make sure RayCluster's memory and CPU specs in helm values match whatever node you are using for your EKS cluster.
 
 To run Volga tests (https://github.com/volga-project/volga/blob/master/volga/streaming/runtime/network/test_remote_transfer.py as example)
 - Build Python wheel with Rust binaries (from ```/volga/rust```), make sure you use python 3.10 (in your conda env as an example):
@@ -40,7 +62,7 @@ To run Volga tests (https://github.com/volga-project/volga/blob/master/volga/str
   ```python test_remote_transfer.py``` (from https://github.com/volga-project/volga/blob/master/volga/streaming/runtime/network/)
 
 
-## Running in Docker
+# Running tests in Docker
 
 ```
 cd docker
