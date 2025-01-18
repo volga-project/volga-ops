@@ -1,2 +1,2 @@
-clusterType: remote
-#clusterType: minikube
+#clusterType: remote
+clusterType: minikube

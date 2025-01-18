@@ -1,0 +1,3 @@
+docker run --name scylla --hostname scylla -d scylladb/scylla --reactor-backend=epoll
+
+https://stackoverflow.com/questions/74265199/error-accessing-scylladb-cluster-outside-docker-container
