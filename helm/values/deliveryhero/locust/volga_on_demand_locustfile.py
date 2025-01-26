@@ -2,7 +2,7 @@
 
 import json
 
-from locust import HttpUser, task, between
+from locust import FastHttpUser, task, between
 import random
 import json
 
@@ -12,7 +12,7 @@ NUM_KEYS = 10000
 API_ROUTE = 'on_demand_compute'
 
 
-class Requester(HttpUser):
+class Requester(FastHttpUser):
 
     @task
     def get_feature(self):
@@ -27,5 +27,6 @@ class Requester(HttpUser):
             }]
         }
         req_json = json.dumps(req)
+        self.client.client.clientpool.close() # not to reuse connections/keep-alive
         self.client.get(f'{API_ROUTE}/{req_json}', headers=default_headers)
         

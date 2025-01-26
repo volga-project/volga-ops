@@ -33,6 +33,12 @@ releases:
     namespace: locust
     values:
       - values/deliveryhero/locust/values.yaml.gotmpl
+  - chart: eks/aws-load-balancer-controller
+    name: aws-load-balancer-controller
+    namespace: kube-system
+    values:
+      - values/eks/aws-load-balancer-controller/values.yaml.gotmpl
+    
 repositories:
   - name: kuberay
     url: https://ray-project.github.io/kuberay-helm/
@@ -42,3 +48,5 @@ repositories:
     url: https://scylla-operator-charts.storage.googleapis.com/stable
   - name: deliveryhero
     url: https://charts.deliveryhero.io/
+  - name: eks
+    url: https://aws.github.io/eks-charts
