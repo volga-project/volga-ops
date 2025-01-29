@@ -1,0 +1,7 @@
+# policy ARN: arn:aws:iam::050011372339:policy/AWSLoadBalancerControllerIAMPolicy
+# TargetGroupBinding CRDs: kk apply -k "github.com/aws/eks-charts/stable/aws-load-balancer-controller//crds?ref=master"
+
+clusterName: volga-test-cluster
+serviceAccount:
+  create: false
+  name: aws-load-balancer-controller

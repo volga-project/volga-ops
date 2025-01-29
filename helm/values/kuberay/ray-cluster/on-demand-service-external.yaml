@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: on-demand-service-external
+spec:
+  type: NodePort
+  selector:
+    ray.io/group: on-demand-nodes
+  ports:
+    - protocol: TCP
+      port: 1122
+      targetPort: 1122

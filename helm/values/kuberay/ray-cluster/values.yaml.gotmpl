@@ -40,7 +40,7 @@ head:
     limits:
       memory: 4Gi
     requests:
-      memory: 3Gi
+      memory: 2500Mi
     {{ end }}
   annotations: {}
   volumes:
@@ -170,7 +170,7 @@ additionalWorkerGroups:
     {{ if (eq .Values.clusterType "minikube") }}
     replicas: 3
     {{ else }}
-    replicas: 16
+    replicas: 2
     {{ end }}
     minReplicas: 0
     maxReplicas: 1000
@@ -178,7 +178,7 @@ additionalWorkerGroups:
       {{ if (eq .Values.clusterType "minikube") }}
       num-cpus: '8'
       {{ else }}
-      num-cpus: '8'
+      num-cpus: '2'
       {{ end }}
       resources: '"{\"on_demand_node\": 999999}"'
   #    resources: '"{\"worker_size_small\": 9999999, \"instance_on_demand\": 9999999}"'
@@ -209,9 +209,9 @@ additionalWorkerGroups:
     {{ else }}
     resources:
       limits:
-        memory: 14Gi
+        memory: 4Gi
       requests:
-        memory: 14Gi
+        memory: 2500Mi
     {{ end }}
     volumes:
       - name: log-volume

@@ -28,13 +28,15 @@ master:
   # master.replicas -- Should be set to either 0 or 1.
   replicas: 1
   # master.resources -- resources for the locust master
+
+  {{ if (eq .Values.clusterType "minikube") }}
   resources: {}
-    # limits:
-    #   cpu: 2000m
-    #   memory: 1024Mi
-    # requests:
-    #   cpu: 1000m
-    #   memory: 1024Mi
+  {{ else }}
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 800Mi
+  {{ end }}
   serviceAccountAnnotations: {}
   # master.deploymentAnnotations -- Annotations on the deployment for master
   deploymentAnnotations: {}
@@ -115,7 +117,7 @@ worker:
   image: ""
   # worker.logLevel -- Log level. Can be INFO or DEBUG
   logLevel: INFO
-  replicas: 1
+  replicas: 8
   # worker.pdb.enabled -- Whether to create a PodDisruptionBudget for the worker pods
   pdb:
     enabled: false
@@ -125,13 +127,15 @@ worker:
     maxReplicas: 100
     targetCPUUtilizationPercentage: 40
   # worker.resources -- resources for the locust worker
+
+  {{ if (eq .Values.clusterType "minikube") }}
   resources: {}
-    # limits:
-    #   cpu: 500m
-    #   memory: 256Mi
-    # requests:
-    #   cpu: 500m
-    #   memory: 256Mi
+  {{ else }}
+  resources:
+     requests:
+       cpu: 500m
+       memory: 256Mi
+  {{ end }}
   serviceAccountAnnotations: {}
   # worker.deploymentAnnotations -- Annotations on the deployment for workers
   deploymentAnnotations: {}

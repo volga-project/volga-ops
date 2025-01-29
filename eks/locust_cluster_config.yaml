@@ -14,8 +14,19 @@ vpc:
         id: subnet-0875b1951471ddede
       ap-northeast-1c:
         id: subnet-0e385e00f0b80e03f
+iam:
+  withOIDC: true
+addons:
+- name: amazon-cloudwatch-observability
+  attachPolicy:
+    Version: "2012-10-17"
+    Statement:
+      - Effect: Allow
+        Action: '*' # TODO THIS IS BAD FOR PROD
+        Resource: '*'
+
 nodeGroups:
-  - name: common
+  - name: locust-workers
     instanceType: t2.medium
     desiredCapacity: 2
     subnets:

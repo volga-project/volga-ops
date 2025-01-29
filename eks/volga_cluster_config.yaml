@@ -14,10 +14,38 @@ vpc:
         id: subnet-0875b1951471ddede
       ap-northeast-1c:
         id: subnet-0e385e00f0b80e03f
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: aws-load-balancer-controller
+        namespace: kube-system
+      attachPolicyARNs:
+        - 'arn:aws:iam::050011372339:policy/AWSLoadBalancerControllerIAMPolicy'
+    - metadata:
+        name: external-dns
+        namespace: default
+      attachPolicyARNs:
+        - 'arn:aws:iam::050011372339:policy/AllowExternalDNSUpdates'
+addons:
+- name: aws-ebs-csi-driver
+  attachPolicy:
+    Version: '2012-10-17'
+    Statement:
+      - Effect: Allow
+        Action: '*'
+        Resource: '*'
+- name: amazon-cloudwatch-observability
+  attachPolicy:
+    Version: '2012-10-17'
+    Statement:
+      - Effect: Allow
+        Action: '*' # TODO THIS IS BAD FOR PROD
+        Resource: '*'
+
 nodeGroups:
   - name: shared
     instanceType: t3.medium
-#    instanceType: c5.xlarge
     desiredCapacity: 1
     subnets:
       - ap-northeast-1a
@@ -27,7 +55,6 @@ nodeGroups:
       allow: true
     amiFamily: Ubuntu2204
   - name: ray-head
-#    instanceType: c5.xlarge
     instanceType: t3.medium
     desiredCapacity: 1
     subnets:
@@ -48,20 +75,11 @@ nodeGroups:
         value: head
         effect: NoSchedule
   - name: ray-workers
-#    instanceType: c5.2xlarge
     instanceType: t3.medium
-    desiredCapacity: 0
+    desiredCapacity: 2
     ssh:
       allow: true
     amiFamily: Ubuntu2204
-#    minSize: 2
-#    maxSize: 2
-#    instancesDistribution:
-#      maxPrice: 0.1
-#      instanceTypes:
-#        - c5.2xlarge
-#      onDemandBaseCapacity: 0
-#      onDemandPercentageAboveBaseCapacity: 0
     subnets:
       - ap-northeast-1a
     kubeletExtraConfig:
@@ -75,4 +93,20 @@ nodeGroups:
         effect: NoSchedule
       - key: ray-role
         value: worker
+        effect: NoSchedule
+  - name: scylla-workers
+    instanceType: t3.medium
+    desiredCapacity: 2
+    ssh:
+      allow: true
+    amiFamily: Ubuntu2204
+    subnets:
+      - ap-northeast-1a
+    kubeletExtraConfig:
+      cpuCFSQuota: false
+    labels:
+      workload-type: scylla
+    taints:
+      - key: workload-type
+        value: scylla
         effect: NoSchedule

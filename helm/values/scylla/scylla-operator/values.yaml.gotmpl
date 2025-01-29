@@ -21,16 +21,16 @@ nodeSelector: { }
 tolerations: [ ]
 
 # Affinity for Scylla Operator pods
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 1
-      podAffinityTerm:
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: scylla-operator
-            app.kubernetes.io/instance: scylla-operator
-        topologyKey: kubernetes.io/hostname
+#affinity:
+#  podAntiAffinity:
+#    preferredDuringSchedulingIgnoredDuringExecution:
+#    - weight: 1
+#      podAffinityTerm:
+#        labelSelector:
+#          matchLabels:
+#            app.kubernetes.io/name: scylla-operator
+#            app.kubernetes.io/instance: scylla-operator
+#        topologyKey: kubernetes.io/hostname
 
 webhook:
   # Specifies whether a self signed certificate should be created using cert-manager
@@ -53,7 +53,7 @@ securityContext: {}
 
 # Replicas for Webhook Server. Setting to 1 will disable pdb creation and
 # won't be HA; it won't react during operator upgrades or disruptions.
-webhookServerReplicas: 2
+webhookServerReplicas: 1
 
 # Resources allocated to Webhook Server pods
 webhookServerResources:
@@ -62,19 +62,19 @@ webhookServerResources:
     memory: 20Mi
 
 # Node selector for Webhook Server pods
-webhookServerNodeSelector: { }
+webhookServerNodeSelector: {}
 
 # Tolerations for Webhook Server pods
 webhookServerTolerations: [ ]
 
 # Affinity for Webhook Server pods
-webhookServerAffinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 1
-      podAffinityTerm:
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: webhook-server
-            app.kubernetes.io/instance: webhook-server
-        topologyKey: kubernetes.io/hostname
+#webhookServerAffinity:
+#  podAntiAffinity:
+#    preferredDuringSchedulingIgnoredDuringExecution:
+#    - weight: 1
+#      podAffinityTerm:
+#        labelSelector:
+#          matchLabels:
+#            app.kubernetes.io/name: webhook-server
+#            app.kubernetes.io/instance: webhook-server
+#        topologyKey: kubernetes.io/hostname

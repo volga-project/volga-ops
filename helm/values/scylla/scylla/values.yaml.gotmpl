@@ -52,34 +52,40 @@ racks:
     scyllaConfig: scylla-config
     # Name of additional scylla manager agent config stored as secret
     scyllaAgentConfig: scylla-agent-config
+    {{ if not (eq .Values.clusterType "minikube") }}
+    # Number of rack members (nodes)
+    members: 2
+    storage:
+      storageClassName: gp2
+      capacity: 2Gi
+    resources:
+      limits:
+        cpu: 2000m
+        memory: 4000Mi
+      requests:
+        cpu: 500m
+        memory: 2700Mi # assume we take whole t2.medium
+    placement:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: workload-type
+                  operator: In
+                  values:
+                    - scylla
+      tolerations:
+        - effect: NoSchedule
+          key: workload-type
+          operator: Equal
+          value: scylla
+    {{ else }}
     # Number of rack members (nodes)
     members: 1
-    # Storage definition
     storage:
       storageClassName: standard
       capacity: 2Gi
-    # Scylla container resource definition
-    resources:
-      limits:
-        cpu: 1
-        memory: 4Gi
-      requests:
-        cpu: 1
-        memory: 4Gi
-#    placement:
-#      nodeAffinity:
-#        requiredDuringSchedulingIgnoredDuringExecution:
-#          nodeSelectorTerms:
-#            - matchExpressions:
-#                - key: scylla.scylladb.com/node-type
-#                  operator: In
-#                  values:
-#                    - scylla
-#      tolerations:
-#        - effect: NoSchedule
-#          key: scylla-operator.scylladb.com/dedicated
-#          operator: Equal
-#          value: scyllaclusters
+    {{ end }}
 # Whether to create Prometheus ServiceMonitor
 serviceMonitor:
   create: false
