@@ -22,11 +22,6 @@ iam:
         namespace: kube-system
       attachPolicyARNs:
         - 'arn:aws:iam::050011372339:policy/AWSLoadBalancerControllerIAMPolicy'
-    - metadata:
-        name: external-dns
-        namespace: default
-      attachPolicyARNs:
-        - 'arn:aws:iam::050011372339:policy/AllowExternalDNSUpdates'
 addons:
 - name: aws-ebs-csi-driver
   attachPolicy:

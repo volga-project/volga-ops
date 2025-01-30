@@ -34,8 +34,7 @@ master:
   {{ else }}
   resources:
     requests:
-      cpu: 1000m
-      memory: 800Mi
+      cpu: 700m
   {{ end }}
   serviceAccountAnnotations: {}
   # master.deploymentAnnotations -- Annotations on the deployment for master
@@ -117,7 +116,7 @@ worker:
   image: ""
   # worker.logLevel -- Log level. Can be INFO or DEBUG
   logLevel: INFO
-  replicas: 8
+  replicas: 1
   # worker.pdb.enabled -- Whether to create a PodDisruptionBudget for the worker pods
   pdb:
     enabled: false
@@ -133,8 +132,7 @@ worker:
   {{ else }}
   resources:
      requests:
-       cpu: 500m
-       memory: 256Mi
+       cpu: 700m
   {{ end }}
   serviceAccountAnnotations: {}
   # worker.deploymentAnnotations -- Annotations on the deployment for workers

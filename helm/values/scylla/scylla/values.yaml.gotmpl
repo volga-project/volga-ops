@@ -54,13 +54,13 @@ racks:
     scyllaAgentConfig: scylla-agent-config
     {{ if not (eq .Values.clusterType "minikube") }}
     # Number of rack members (nodes)
-    members: 2
+    members: 1
     storage:
       storageClassName: gp2
-      capacity: 2Gi
+      capacity: 12Gi
     resources:
       limits:
-        cpu: 2000m
+        cpu: 1000m
         memory: 4000Mi
       requests:
         cpu: 500m
