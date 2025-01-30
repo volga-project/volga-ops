@@ -2,16 +2,16 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: volga-on-demand-ingress
+  namespace: ray-system
   annotations:
-    kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/subnets: subnet-0875b1951471ddede,subnet-0e385e00f0b80e03f
 spec:
+  ingressClassName: alb
   rules:
-    - host: volga-on-demand.svoe.link
-      http:
+    - http:
         paths:
-          - path: /
+          - path: /on_demand_compute
             pathType: Prefix
             backend:
               service:

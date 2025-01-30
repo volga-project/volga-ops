@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: on-demand-service
+  namespace: ray-system
 spec:
   selector:
     ray.io/group: on-demand-nodes
