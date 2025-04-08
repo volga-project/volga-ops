@@ -23,19 +23,19 @@ iam:
       attachPolicyARNs:
         - 'arn:aws:iam::050011372339:policy/AWSLoadBalancerControllerIAMPolicy'
 addons:
-- name: aws-ebs-csi-driver
-  attachPolicy:
-    Version: '2012-10-17'
-    Statement:
-      - Effect: Allow
-        Action: '*'
-        Resource: '*'
 - name: amazon-cloudwatch-observability
   attachPolicy:
     Version: '2012-10-17'
     Statement:
       - Effect: Allow
         Action: '*' # TODO THIS IS BAD FOR PROD
+        Resource: '*'
+- name: aws-ebs-csi-driver
+  attachPolicy:
+    Version: '2012-10-17'
+    Statement:
+      - Effect: Allow
+        Action: '*'
         Resource: '*'
 
 nodeGroups:

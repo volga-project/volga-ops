@@ -17,18 +17,19 @@ TEST_FEATURE_NAME = 'test_feature'
 
 class Requester(FastHttpUser):
     wait_time = constant_throughput(RPS_PER_USER)
-
+    
     @task
     def get_feature(self):
         i = random.randint(0, NUM_KEYS)
         req = {
-            'args': [{
-                'feature_name': TEST_FEATURE_NAME,
-                'serve_or_udf': True,
-                'keys': {
-                    'key': f'key_{i}'
-                }
-            }]
+            'target_features': [TEST_FEATURE_NAME], 
+            'feature_keys': {
+                TEST_FEATURE_NAME: [
+                    {'id': f'test-id-{i}'}, 
+                ]
+            }, 
+            'query_args': None, 
+            'udf_args': {TEST_FEATURE_NAME: {'multiplier': 2.0}}
         }
         req_json = json.dumps(req)
         # self.client.client.clientpool.close() # not to reuse connections/keep-alive
