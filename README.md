@@ -72,19 +72,54 @@ docker run volga_perf
 
 Test script is in ```perf_test.py```. Everytime script is updated image needs to be re-built (```docker build . -t volga_perf```)
 
-## On-Demand Compute perf test on Kuber with Locust and Scylla
+## On-Demand Compute perf test on Kuber with Locust, Scylla, CloudWatch
+
+- Proepr cloudwatch permission on EKS cluster
+  ```
+  addons:
+  - name: amazon-cloudwatch-observability
+    attachPolicy:
+      Version: '2012-10-17'
+      Statement:
+        - Effect: Allow
+          Action: '*' # TODO THIS IS BAD FOR PROD
+          Resource: '*'
+  ```
+
 - Deploy aws-load-balancer-controller
+  - Assure proper permissions - add this to your EKS cluster config (alternatively create wth these flags)
+    ```
+    iam:
+    withOIDC: true
+    serviceAccounts:
+      - metadata:
+          name: aws-load-balancer-controller
+          namespace: kube-system
+        attachPolicyARNs:
+          - 'arn:aws:iam::<your-id>:policy/AWSLoadBalancerControllerIAMPolicy'  
+    ```
   - ```helmfile --selector name=aws-load-balancer-controller sync --skip-deps```
 - Deploy Locust
   - ```kk create cm volga-on-demand-locustfile -n locust --from-file values/deliveryhero/locust/volga_on_demand_locustfile.py``` - creates configmap with locustfile
   - ```helmfile --selector name=locust sync --skip-deps```
 - Deploy ScyllaDB
+  - Ensure ebs-csi-driver addon for EKS cluster 
+    ```
+    addons:
+    - name: aws-ebs-csi-driver
+      attachPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: '*'
+            Resource: '*'
+    ```
   - ```kk apply -f values/scylla/third-party/cert-manager.yaml``` - requires cert manager
   - ```helmfile --selector name=scylla-operator sync --skip-deps``` - install operator
   - ```helmfile --selector name=scylla sync --skip-deps``` - install test cluster
   - ```exec kubectl exec -i -t -n scylla scylla-test-dc-test-rack-0 -c scylla -- sh -c "clear; (bash || ash || sh)"``` - (optional) test sample pod works ok
 - Create external service and ingress for on-demand service
-  - kk apply -f values/kuberay/ray-cluster/on-demand-service-external.yaml
-  - kk apply -f values/kuberay/ray-cluster/on-demand-ingress.yaml
+  - ```kk apply -f values/kuberay/ray-cluster/on-demand-service-external.yaml```
+  - ```kk apply -f values/kuberay/ray-cluster/on-demand-ingress.yaml```
 - Port forward everything
   - ```sudo kubefwd svc -n ray-system -n locust```
