@@ -25,9 +25,8 @@ Start Minikube cluster
   
 - ```minikube start --driver docker --nodes 5``` # cluster with 5 nodes
 
-## Deploy
+## Deploy Ray Cluster
 
-Deploy Ray cluster
 - Intsall ```helmfile``` - https://github.com/helmfile/helmfile
 
 - Make sure ```clusterType``` env val is set to ```minikube``` in ```helm/env_values.yaml```
@@ -45,6 +44,7 @@ Deploy Ray cluster
 
 Make sure RayCluster's memory and CPU specs in helm values match whatever node you are using for your EKS cluster.
 
+## Streaming tests on Kuber
 To run Volga tests (https://github.com/volga-project/volga/blob/master/volga/streaming/runtime/network/test_remote_transfer.py as example)
 - Build Python wheel with Rust binaries (from ```/volga/rust```), make sure you use python 3.10 (in your conda env as an example):
 
@@ -62,7 +62,7 @@ To run Volga tests (https://github.com/volga-project/volga/blob/master/volga/str
   ```python test_remote_transfer.py``` (from https://github.com/volga-project/volga/blob/master/volga/streaming/runtime/network/)
 
 
-# Running tests in Docker
+## Running Streaming Perf tests in Docker
 
 ```
 cd docker
@@ -71,3 +71,55 @@ docker run volga_perf
 ```
 
 Test script is in ```perf_test.py```. Everytime script is updated image needs to be re-built (```docker build . -t volga_perf```)
+
+## On-Demand Compute perf test on Kuber with Locust, Scylla, CloudWatch
+
+- Proepr cloudwatch permission on EKS cluster
+  ```
+  addons:
+  - name: amazon-cloudwatch-observability
+    attachPolicy:
+      Version: '2012-10-17'
+      Statement:
+        - Effect: Allow
+          Action: '*' # TODO THIS IS BAD FOR PROD
+          Resource: '*'
+  ```
+
+- Deploy aws-load-balancer-controller
+  - Assure proper permissions - add this to your EKS cluster config (alternatively create wth these flags)
+    ```
+    iam:
+    withOIDC: true
+    serviceAccounts:
+      - metadata:
+          name: aws-load-balancer-controller
+          namespace: kube-system
+        attachPolicyARNs:
+          - 'arn:aws:iam::<your-id>:policy/AWSLoadBalancerControllerIAMPolicy'  
+    ```
+  - ```helmfile --selector name=aws-load-balancer-controller sync --skip-deps```
+- Deploy Locust
+  - ```kk create cm volga-on-demand-locustfile -n locust --from-file values/deliveryhero/locust/volga_on_demand_locustfile.py``` - creates configmap with locustfile
+  - ```helmfile --selector name=locust sync --skip-deps```
+- Deploy ScyllaDB
+  - Ensure ebs-csi-driver addon for EKS cluster 
+    ```
+    addons:
+    - name: aws-ebs-csi-driver
+      attachPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: '*'
+            Resource: '*'
+    ```
+  - ```kk apply -f values/scylla/third-party/cert-manager.yaml``` - requires cert manager
+  - ```helmfile --selector name=scylla-operator sync --skip-deps``` - install operator
+  - ```helmfile --selector name=scylla sync --skip-deps``` - install test cluster
+  - ```exec kubectl exec -i -t -n scylla scylla-test-dc-test-rack-0 -c scylla -- sh -c "clear; (bash || ash || sh)"``` - (optional) test sample pod works ok
+- Create external service and ingress for on-demand service
+  - ```kk apply -f values/kuberay/ray-cluster/on-demand-service-external.yaml```
+  - ```kk apply -f values/kuberay/ray-cluster/on-demand-ingress.yaml```
+- Port forward everything
+  - ```sudo kubefwd svc -n ray-system -n locust```
