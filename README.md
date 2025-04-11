@@ -122,5 +122,6 @@ Test script is in ```perf_test.py```. Everytime script is updated image needs to
 - Create external service and ingress for on-demand service
   - ```kk apply -f values/kuberay/ray-cluster/on-demand-service-external.yaml```
   - ```kk apply -f values/kuberay/ray-cluster/on-demand-ingress.yaml```
+  - Verify LB is created ```aws elbv2 describe-load-balancers```
 - Port forward everything
   - ```sudo kubefwd svc -n ray-system -n locust```
