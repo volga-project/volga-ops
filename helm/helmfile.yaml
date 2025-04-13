@@ -25,7 +25,7 @@ releases:
       - values/scylla/scylla-operator/values.yaml.gotmpl
   - chart: scylla/scylla
     name: scylla
-    namespace: scylla
+    namespace: scylla-operator
     values:
       - values/scylla/scylla/values.yaml.gotmpl
   - chart: deliveryhero/locust

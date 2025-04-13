@@ -41,7 +41,7 @@ addons:
 nodeGroups:
   - name: shared
     instanceType: t3.medium
-    desiredCapacity: 1
+    desiredCapacity: 4
     subnets:
       - ap-northeast-1a
     kubeletExtraConfig:
@@ -104,4 +104,20 @@ nodeGroups:
     taints:
       - key: workload-type
         value: scylla
+        effect: NoSchedule
+  - name: locust-workers
+    instanceType: t3.medium
+    desiredCapacity: 2
+    ssh:
+      allow: true
+    amiFamily: Ubuntu2204
+    subnets:
+      - ap-northeast-1a
+    kubeletExtraConfig:
+      cpuCFSQuota: false
+    labels:
+      workload-type: locust
+    taints:
+      - key: workload-type
+        value: locust
         effect: NoSchedule
