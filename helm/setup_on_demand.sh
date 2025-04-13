@@ -2,11 +2,11 @@
 
 eksctl utils write-kubeconfig --cluster=volga-test-cluster
 
+helmfile  --selector name=aws-load-balancer-controller sync --skip-deps
+
 helmfile --selector name=kuberay-operator sync --skip-deps
 
 helmfile --selector name=ray-cluster sync --skip-deps
-
-helmfile  --selector name=aws-load-balancer-controller sync --skip-deps
 
 kubectl apply -f values/kuberay/ray-cluster/on-demand-service-external.yaml
 

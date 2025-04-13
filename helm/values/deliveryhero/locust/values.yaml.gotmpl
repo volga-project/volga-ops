@@ -155,13 +155,14 @@ worker:
   # worker.tolerations -- Overwrites tolerations from global
   # worker.affinity -- Overwrites affinity from global
   affinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: workload-type
-              operator: In
-              values:
-                - locust
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: workload-type
+                operator: In
+                values:
+                  - locust
   tolerations:
     - effect: NoSchedule
       key: workload-type
