@@ -100,6 +100,7 @@ Test script is in ```perf_test.py```. Everytime script is updated image needs to
     ```
   - ```helmfile --selector name=aws-load-balancer-controller sync --skip-deps```
 - Deploy Locust
+  - ```kk create ns locust```  
   - ```kk create cm volga-on-demand-locustfile -n locust --from-file values/deliveryhero/locust/volga_on_demand_locustfile.py``` - creates configmap with locustfile
   - ```helmfile --selector name=locust sync --skip-deps```
 - Deploy ScyllaDB
@@ -121,5 +122,6 @@ Test script is in ```perf_test.py```. Everytime script is updated image needs to
 - Create external service and ingress for on-demand service
   - ```kk apply -f values/kuberay/ray-cluster/on-demand-service-external.yaml```
   - ```kk apply -f values/kuberay/ray-cluster/on-demand-ingress.yaml```
+  - Verify LB is created ```aws elbv2 describe-load-balancers```
 - Port forward everything
   - ```sudo kubefwd svc -n ray-system -n locust```
