@@ -105,6 +105,22 @@ nodeGroups:
       - key: workload-type
         value: scylla
         effect: NoSchedule
+  - name: scylla-workers-big
+    instanceType: c5.9xlarge
+    desiredCapacity: 1
+    ssh:
+      allow: true
+    amiFamily: Ubuntu2204
+    subnets:
+      - ap-northeast-1a
+    kubeletExtraConfig:
+      cpuCFSQuota: false
+    labels:
+      workload-type: scylla
+    taints:
+      - key: workload-type
+        value: scylla
+        effect: NoSchedule
   - name: locust-workers
     instanceType: t3.medium
     desiredCapacity: 2
