@@ -90,8 +90,8 @@ nodeGroups:
         value: worker
         effect: NoSchedule
   - name: scylla-workers
-    instanceType: t3.medium
-    desiredCapacity: 2
+    instanceType: c5.2xlarge
+    desiredCapacity: 1
     ssh:
       allow: true
     amiFamily: Ubuntu2204

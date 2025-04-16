@@ -170,7 +170,7 @@ additionalWorkerGroups:
     {{ if (eq .Values.clusterType "minikube") }}
     replicas: 3
     {{ else }}
-    replicas: 2
+    replicas: 5
     {{ end }}
     minReplicas: 0
     maxReplicas: 1000

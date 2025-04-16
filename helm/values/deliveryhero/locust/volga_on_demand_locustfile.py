@@ -10,9 +10,11 @@ import math
 default_headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'}
 
 NUM_KEYS = 10000
+
+# below should be in sync with benchmark.py in volga
 API_ROUTE = 'on_demand_compute'
-RPS_PER_USER = 10
-TEST_FEATURE_NAME = 'test_feature'
+RPS_PER_USER = 10 
+FEATURE_NAME = 'simple_feature'
 
 
 class Requester(FastHttpUser):
@@ -22,14 +24,14 @@ class Requester(FastHttpUser):
     def get_feature(self):
         i = random.randint(0, NUM_KEYS)
         req = {
-            'target_features': [TEST_FEATURE_NAME], 
+            'target_features': [FEATURE_NAME], 
             'feature_keys': {
-                TEST_FEATURE_NAME: [
+                FEATURE_NAME: [
                     {'id': f'test-id-{i}'}, 
                 ]
             }, 
             'query_args': None, 
-            'udf_args': {TEST_FEATURE_NAME: {'multiplier': 2.0}}
+            'udf_args': {FEATURE_NAME: {'multiplier': 2.0}}
         }
         req_json = json.dumps(req)
         # self.client.client.clientpool.close() # not to reuse connections/keep-alive
