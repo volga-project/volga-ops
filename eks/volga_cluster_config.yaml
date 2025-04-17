@@ -90,8 +90,8 @@ nodeGroups:
         value: worker
         effect: NoSchedule
   - name: scylla-workers
-    instanceType: c5.2xlarge
-    desiredCapacity: 1
+    instanceType: t3.medium
+    desiredCapacity: 0
     ssh:
       allow: true
     amiFamily: Ubuntu2204
@@ -105,8 +105,8 @@ nodeGroups:
       - key: workload-type
         value: scylla
         effect: NoSchedule
-  - name: scylla-workers-big
-    instanceType: c5.9xlarge
+  - name: redis-workers
+    instanceType: t3.medium
     desiredCapacity: 1
     ssh:
       allow: true
@@ -116,10 +116,10 @@ nodeGroups:
     kubeletExtraConfig:
       cpuCFSQuota: false
     labels:
-      workload-type: scylla
+      workload-type: redis
     taints:
       - key: workload-type
-        value: scylla
+        value: redis
         effect: NoSchedule
   - name: locust-workers
     instanceType: t3.medium

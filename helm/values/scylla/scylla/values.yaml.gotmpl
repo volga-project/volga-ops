@@ -60,11 +60,11 @@ racks:
       capacity: 12Gi
     resources:
       limits:
-        cpu: 8000m
-        memory: 16Gi
+        cpu: 36000m
+        memory: 72Gi
       requests:
-        cpu: 6000m
-        memory: 12Gi # assume we take whole t2.medium
+        cpu: 30000m
+        memory: 64Gi # assume we take whole t2.medium
     placement:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
